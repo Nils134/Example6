@@ -51,12 +51,12 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     private List<Particle> particles = new ArrayList<>();
     private List<Rectangle> building = new ArrayList<>();
 
-    private final int NUM_PART = 100;
+    private final int NUM_PART = 1000;
     private final double H = 2;
 
-    private float ROTATION_OFFSET = -59;      // the buildings standard rotational offset
+    private float ROTATION_OFFSET = -68;      // the buildings standard rotational offset
     private int TOTALSTEPS = 0;
-    private final float STEP_SIZE = 0.8f;
+    private final float STEP_SIZE = 0.6f;
     private final int PPM = 38;         // Pixels per meter
     private boolean INITROUND = true;
 
@@ -340,7 +340,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                 SensorManager.getOrientation(RotationM, OrientationM);
 
                 System.out.println("rotation = " + OrientationM[0]);
-                direction = OrientationM[0] - ROTATION_OFFSET;
+                direction = (float) Math.toDegrees(OrientationM[0]) - ROTATION_OFFSET;
                 break;
             case Sensor.TYPE_STEP_COUNTER:
                 currSteps = ((int) event.values[0]) - TOTALSTEPS;
@@ -349,26 +349,37 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                     distance = 0;
                     INITROUND = false;
                 } else {
-                    distance = currSteps * STEP_SIZE * PPM;
+                    distance = 1 * STEP_SIZE * PPM;
 
                     System.out.println(currSteps + " steps");
                 }
+                updateParticles(distance, direction);
+                reDraw();
                 break;
         }
 
-        updateParticles(distance, direction);
 
-        // if there is a collision between the dot and any of the walls
-        if(isCollision()) {
-            // reset dot to center of canvas
-            Display display = getWindowManager().getDefaultDisplay();
-            Point size = new Point();
-            display.getSize(size);
-            int width = size.x;
-            int height = size.y;
-            drawable.getPaint().setColor(Color.BLUE);
-            drawable.setBounds(width/2-20, height/2-20, width/2+20, height/2+20);
-        }
+
+
+
+    }
+
+    public void reDraw() {
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int width = size.x;
+        int height = size.y;
+        System.out.println("Size of screen known as: " + width + ", and height " + height);
+
+        // create a drawable object
+        drawBuilding(width,height);
+
+        // create a canvas
+        ImageView canvasView = (ImageView) findViewById(R.id.canvas);
+        Bitmap blankBitmap = Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);
+        canvas = new Canvas(blankBitmap);
+        canvasView.setImageBitmap(blankBitmap);
 
         // redrawing of the object
         canvas.drawColor(Color.WHITE);
