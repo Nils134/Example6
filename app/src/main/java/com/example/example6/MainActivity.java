@@ -49,11 +49,14 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     private final int NUM_PART = 5000;
     private final double H = 2;
 
-    private float ROTATION_OFFSET = 0;      // the buildings standard rotational offset
+    private float ROTATION_OFFSET = -59;      // the buildings standard rotational offset
     private int TOTALSTEPS = 0;
     private final float STEP_SIZE = 0.8f;
     private final int PPM = 38;         // Pixels per meter
     private boolean INITROUND = true;
+
+    float distance = 0;
+    float direction = 0;
 
 
     @Override
@@ -221,8 +224,12 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         List<Particle> toremove = new ArrayList<>();
         for (int i = 0; i < particles.size(); i++) {
             if (!validParticle(particles.get(i))) {
+                toremove.add(particles.get(i));
                 particles.remove(i);
             }
+        }
+        for (Particle p: toremove) {
+            particles.remove(p);
         }
 
         System.out.println("Amount of particles still left is: " + particles.size());
@@ -312,8 +319,6 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        float distance = 0;
-        float direction = 0;
         int currSteps = 0;
 
         switch (event.sensor.getType()) {
@@ -323,8 +328,8 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                 SensorManager.getRotationMatrixFromVector(RotationM, event.values);
                 SensorManager.getOrientation(RotationM, OrientationM);
 
-                System.out.println("angles = " + Math.toDegrees(OrientationM[0]) + "," + Math.toDegrees(OrientationM[1]) + "," + Math.toDegrees(OrientationM[2]));
-                direction = (float)Math.toDegrees(OrientationM[0]) - ROTATION_OFFSET;
+                System.out.println("rotation = " + OrientationM[0]);
+                direction = OrientationM[0] - ROTATION_OFFSET;
                 break;
             case Sensor.TYPE_STEP_COUNTER:
                 currSteps = ((int) event.values[0]) - TOTALSTEPS;
@@ -335,7 +340,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                 } else {
                     distance = currSteps * STEP_SIZE * PPM;
 
-                    System.out.println(currSteps + "steps");
+                    System.out.println(currSteps + " steps");
                 }
                 break;
         }
