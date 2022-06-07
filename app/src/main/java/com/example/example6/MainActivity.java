@@ -52,7 +52,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     private List<Rectangle> building = new ArrayList<>();
 
     private final int NUM_PART = 100;
-    private final double H = 2;
+    private final double H = 10;
 
     private float ROTATION_OFFSET = 0;      // the buildings standard rotational offset
     private int TOTALSTEPS = 0;
@@ -232,9 +232,15 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         List<Particle> toremove = new ArrayList<>();
         for (int i = 0; i < particles.size(); i++) {
             if (!validParticle(particles.get(i))) {
+                toremove.add(particles.get(i));
                 particles.remove(i);
             }
         }
+        for (Particle p:
+                toremove) {
+            particles.remove(p);
+        }
+
 
         System.out.println("Amount of particles still left is: " + particles.size());
         if (particles.size() == 0) {
@@ -344,15 +350,22 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                     distance = 0;
                     INITROUND = false;
                 } else {
-                    distance = currSteps * STEP_SIZE * PPM;
+                    distance = 38;
 
                     System.out.println(currSteps + "steps");
+                    reDraw();
                 }
+                updateParticles(distance, direction);
+
+
                 break;
         }
 
-        updateParticles(distance, direction);
 
+    }
+
+    public void reDraw() {
+        System.out.println("Attempt to redraw system");
         // if there is a collision between the dot and any of the walls
         if(isCollision()) {
             // reset dot to center of canvas
@@ -365,8 +378,26 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
             drawable.setBounds(width/2-20, height/2-20, width/2+20, height/2+20);
         }
 
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int width = size.x;
+        int height = size.y;
+        ImageView canvasView = (ImageView) findViewById(R.id.canvas);
+        Bitmap blankBitmap = Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);
+        canvas = new Canvas(blankBitmap);
+        canvasView.setImageBitmap(blankBitmap);
         // redrawing of the object
-        canvas.drawColor(Color.WHITE);
+        double temp = 0.1;
+        if (temp > 0.5) {
+            System.out.println("test edge case");
+            canvas.drawColor(Color.BLACK);
+        }
+        else {
+            canvas.drawColor(Color.WHITE);
+        }
+        System.out.println("done drawing background");
+
         drawable.draw(canvas);
         for(ShapeDrawable wall : walls) {
             wall.draw(canvas);
@@ -377,14 +408,9 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
             ShapeDrawable shape = new ShapeDrawable(new OvalShape());
             shape.setBounds((int)p.getX()-5, (int) p.getY()-5, (int) p.getX()+5, (int) p.getY()+5);
             shape.getPaint().setColor(Color.RED);
-            if (p.getY() < 300) {
-                shape.getPaint().setColor(Color.GREEN);
-            }
             shape.draw(canvas);
         }
     }
-
-
     /**
      * Determines if the drawable dot intersects with any of the walls.
      * @return True if that's true, false otherwise.
