@@ -34,7 +34,7 @@ public class MainActivity extends Activity implements OnClickListener {
     /**
      * The buttons.
      */
-    private Button up, left, right, down;
+    private Button up;
     /**
      * The text view.
      */
@@ -67,18 +67,11 @@ public class MainActivity extends Activity implements OnClickListener {
 
         // set the buttons
         up = (Button) findViewById(R.id.button1);
-        left = (Button) findViewById(R.id.button2);
-        right = (Button) findViewById(R.id.button3);
-        down = (Button) findViewById(R.id.button4);
-
         // set the text view
         textView = (TextView) findViewById(R.id.textView1);
 
         // set listeners
         up.setOnClickListener(this);
-        down.setOnClickListener(this);
-        left.setOnClickListener(this);
-        right.setOnClickListener(this);
 
         // get the screen dimensions
         Display display = getWindowManager().getDefaultDisplay();
@@ -317,53 +310,7 @@ public class MainActivity extends Activity implements OnClickListener {
         // - The margins
         // - The text that shows the margin
         double direction = 0;
-        double distance = 0;
-        switch (v.getId()) {
-            // UP BUTTON
-            case R.id.button1: {
-                Toast.makeText(getApplication(), "UP", Toast.LENGTH_SHORT).show();
-                Rect r = drawable.getBounds();
-                drawable.setBounds(r.left,r.top-20,r.right,r.bottom-20);
-                textView.setText("\n\tMove Up" + "\n\tTop Margin = "
-                        + drawable.getBounds().top);
-                direction = 0;
-                distance = 38;
-                break;
-            }
-            // DOWN BUTTON
-            case R.id.button4: {
-                Toast.makeText(getApplication(), "DOWN", Toast.LENGTH_SHORT).show();
-                Rect r = drawable.getBounds();
-                drawable.setBounds(r.left,r.top+20,r.right,r.bottom+20);
-                textView.setText("\n\tMove Down" + "\n\tTop Margin = "
-                        + drawable.getBounds().top);
-                direction = 180;
-                distance = 38;
-                break;
-            }
-            // LEFT BUTTON
-            case R.id.button2: {
-                Toast.makeText(getApplication(), "LEFT", Toast.LENGTH_SHORT).show();
-                Rect r = drawable.getBounds();
-                drawable.setBounds(r.left-20,r.top,r.right-20,r.bottom);
-                textView.setText("\n\tMove Left" + "\n\tLeft Margin = "
-                        + drawable.getBounds().left);
-                direction = 270;
-                distance = 38;
-                break;
-            }
-            // RIGHT BUTTON
-            case R.id.button3: {
-                Toast.makeText(getApplication(), "RIGHT", Toast.LENGTH_SHORT).show();
-                Rect r = drawable.getBounds();
-                drawable.setBounds(r.left+20,r.top,r.right+20,r.bottom);
-                textView.setText("\n\tMove Right" + "\n\tLeft Margin = "
-                        + drawable.getBounds().left);
-                direction = 90;
-                distance = 38;
-                break;
-            }
-        }
+        double distance = 38;
 
         updateParticles(distance, direction);
 
