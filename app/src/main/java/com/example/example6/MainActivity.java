@@ -331,6 +331,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     @Override
     public void onSensorChanged(SensorEvent event) {
         int currSteps = 0;
+        ImageView arrow = (ImageView) findViewById(R.id.arrowIcon);
 
         switch (event.sensor.getType()) {
             case Sensor.TYPE_ROTATION_VECTOR:
@@ -341,6 +342,15 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
 
                 System.out.println("rotation = " + OrientationM[0]);
                 direction = OrientationM[0] - ROTATION_OFFSET;
+                arrow.setRotation(direction);
+                break;
+
+            case Sensor.TYPE_ROTATION_VECTOR:
+                SensorManager.getRotationMatrixFromVector(RotationM, event.values);
+                SensorManager.getOrientation(RotationM, OrientationM);
+
+                System.out.println("rotation = " + Math.toDegrees(OrientationM[0]));
+                direction = (float)Math.toDegrees(OrientationM[0]) - ROTATION_OFFSET;
                 break;
             case Sensor.TYPE_STEP_COUNTER:
                 currSteps = ((int) event.values[0]) - TOTALSTEPS;
