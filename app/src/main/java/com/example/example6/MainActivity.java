@@ -30,9 +30,12 @@ import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TimerTask;
+import java.util.Timer;
 
 import org.apache.commons.math3.analysis.function.Gaussian;
 
@@ -50,11 +53,15 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
 
     private List<Particle> particles = new ArrayList<>();
     private List<Rectangle> building = new ArrayList<>();
+    private List<Float> motionEvent = new ArrayList<>();
+    private List<Float> motions = new ArrayList<>();
+
+    private Timer timer = new Timer();
 
     private final int NUM_PART = 1000;
     private final double H = 2;
 
-    private float ROTATION_OFFSET = -68;      // the buildings standard rotational offset
+    private float ROTATION_OFFSET = -58;      // the buildings standard rotational offset
     private int TOTALSTEPS = 0;
     private final float STEP_SIZE = 0.6f;
     private final int PPM = 38;         // Pixels per meter
@@ -63,6 +70,17 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     float distance = 0;
     float direction = 0;
 
+    int steps = 0;
+    int firstnewMotionEvent = 0;
+    private boolean blocking = false;
+    // Measures motion in periods of 700ms
+    TimerTask tt = new TimerTask() {
+        @Override
+        public void run() {
+            copyMotionEvent();
+            assessMotion();
+        };
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +115,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
 
         generateParticles();
 
-       for (Particle p : particles) {
+        for (Particle p : particles) {
             ShapeDrawable shape = new ShapeDrawable(new OvalShape());
             shape.setBounds((int)p.getX()-10, (int) p.getY()-10, (int) p.getX()+10, (int) p.getY()+10);
             shape.getPaint().setColor(Color.RED);
@@ -126,11 +144,18 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         super.onResume();
 
         // Set the sensors
-        stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+        stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         directionSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
         sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_FASTEST);
         sensorManager.registerListener(this, directionSensor, SensorManager.SENSOR_DELAY_NORMAL);
+
+        // Start motion measurement
+        try {
+            timer.schedule(tt, 700, 700);
+        } catch (Exception e){
+            System.out.println(e);
+        }
     }
 
     // onPause() unregisters the sensors for stop listening the events
@@ -138,6 +163,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         super.onPause();
         sensorManager.unregisterListener(this, stepSensor);
         sensorManager.unregisterListener(this, directionSensor);
+        System.out.println(steps + " steps total");
     }
 
     //method to hardcode all rooms within frame
@@ -340,30 +366,75 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                 SensorManager.getRotationMatrixFromVector(RotationM, event.values);
                 SensorManager.getOrientation(RotationM, OrientationM);
 
-                System.out.println("rotation = " + Math.toDegrees(OrientationM[0]));
+//                System.out.println("rotation = " + Math.toDegrees(OrientationM[0]));
                 direction = (float)Math.toDegrees(OrientationM[0]) - ROTATION_OFFSET;
                 arrow.setRotation(direction);
                 break;
-            case Sensor.TYPE_STEP_COUNTER:
-                currSteps = ((int) event.values[0]) - TOTALSTEPS;
-                TOTALSTEPS = (int) event.values[0];
-                if (INITROUND) {
-                    distance = 0;
-                    INITROUND = false;
-                } else {
-                    distance = 1 * STEP_SIZE * PPM;
-
-                    System.out.println(currSteps + " steps");
+//            case Sensor.TYPE_STEP_DETECTOR:
+//                if (event.values[0] == 1.0f) {
+//                    System.out.println("yas");
+//                }
+//                System.out.println("detecting: "+ event.values[0]);
+//                break;
+//            case Sensor.TYPE_STEP_COUNTER:
+//                currSteps = ((int) event.values[0]) - TOTALSTEPS;
+//                TOTALSTEPS = (int) event.values[0];
+//                if (INITROUND) {
+//                    distance = 0;
+//                    INITROUND = false;
+//                } else {
+//                    distance = 1 * STEP_SIZE * PPM;
+//
+//                    System.out.println(currSteps + " steps");
+//                }
+//                updateParticles(distance, direction);
+//                reDraw();
+//                break;
+            case Sensor.TYPE_ACCELEROMETER:
+//                // get time
+//                LocalTime time = java.time.LocalTime.now();
+//                System.out.println(event.values[0] + "," + event.values[1] + "," + event.values[2] + "," + time.toNanoOfDay());
+                // IF ACC VARIATION > 0.8 ==> WALK, OTHERWISE ==> STILL
+                while( blocking ) {
+                    System.out.println("blocking = " + blocking);
                 }
-                updateParticles(distance, direction);
-                reDraw();
-                break;
+                motionEvent.add(event.values[2]);       // Only z value is used
         }
+    }
 
+    public void copyMotionEvent(){
+        blocking = true;
+        for (int i = firstnewMotionEvent; i < motionEvent.size(); i++){
+            motions.add(motionEvent.get(i));
+        }
+        firstnewMotionEvent = motionEvent.size();
+        blocking = false;
+    }
 
-
-
-
+    public void assessMotion(){
+        float max = Float.MIN_VALUE;
+        float min = Float.MAX_VALUE;
+        float variance;
+        for (float motion : motions){
+            if (motion > max){
+                max = motion;
+            }
+            if (motion < min){
+                min = motion;
+            }
+        }
+        variance = max - min;
+        System.out.println("min = " + min + ", max = " + max + ", var = " + variance);
+        if (variance >= 1.4){
+            System.out.println("1 step");
+            steps++;
+            distance = 1 * STEP_SIZE * PPM;
+            updateParticles(distance, direction);
+            reDraw();
+        } else {
+            System.out.println("NO STEPS");
+        }
+        motions.clear();
     }
 
     public void reDraw() {
