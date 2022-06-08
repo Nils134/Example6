@@ -366,36 +366,11 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                 SensorManager.getRotationMatrixFromVector(RotationM, event.values);
                 SensorManager.getOrientation(RotationM, OrientationM);
 
-//                System.out.println("rotation = " + Math.toDegrees(OrientationM[0]));
                 direction = (float)Math.toDegrees(OrientationM[0]) - ROTATION_OFFSET;
                 arrow.setRotation(direction);
                 break;
-//            case Sensor.TYPE_STEP_DETECTOR:
-//                if (event.values[0] == 1.0f) {
-//                    System.out.println("yas");
-//                }
-//                System.out.println("detecting: "+ event.values[0]);
-//                break;
-//            case Sensor.TYPE_STEP_COUNTER:
-//                currSteps = ((int) event.values[0]) - TOTALSTEPS;
-//                TOTALSTEPS = (int) event.values[0];
-//                if (INITROUND) {
-//                    distance = 0;
-//                    INITROUND = false;
-//                } else {
-//                    distance = 1 * STEP_SIZE * PPM;
-//
-//                    System.out.println(currSteps + " steps");
-//                }
-//                updateParticles(distance, direction);
-//                reDraw();
-//                break;
             case Sensor.TYPE_ACCELEROMETER:
-//                // get time
-//                LocalTime time = java.time.LocalTime.now();
-//                System.out.println(event.values[0] + "," + event.values[1] + "," + event.values[2] + "," + time.toNanoOfDay());
-                // IF ACC VARIATION > 0.8 ==> WALK, OTHERWISE ==> STILL
-                while( blocking ) {
+                while( blocking ) {         // Blocks this thread to write motionEvent list to motions list
                     System.out.println("blocking = " + blocking);
                 }
                 motionEvent.add(event.values[2]);       // Only z value is used
@@ -435,6 +410,11 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
             System.out.println("NO STEPS");
         }
         motions.clear();
+    }
+
+    // TODO: write in which room someone is (e.g. by deciding on the room with the most particles in it at any time)
+    public void roomNumber(){
+        ImageView room = (ImageView) findViewById(R.id.roomText);
     }
 
     public void reDraw() {
