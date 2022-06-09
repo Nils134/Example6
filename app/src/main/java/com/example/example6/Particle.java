@@ -4,6 +4,11 @@ import android.provider.Telephony;
 
 public class Particle {
 
+    //needed for crossing objects
+    private double prev_x;
+    private double prev_y;
+
+
     private double x;
     private double y;
     private double distance;
@@ -24,10 +29,20 @@ public class Particle {
         return this.y;
     }
 
+    public double get_prev_X() {
+        return this.prev_x;
+    }
+
+    public double get_prev_Y() {
+        return this.prev_y;
+    }
+
     public double getDistance() { return this.distance;}
 
     public void updateDistance(double distance, double rotation) {
-        //TODO: add distance covered and the rotation of the particle, and update X and Y
+        this.prev_x = x;
+        this.prev_y = y;
+
         this.distance += distance;
         this.rotation = rotation;
         double radians = Math.toRadians(rotation);
@@ -35,4 +50,6 @@ public class Particle {
         this.y -= distance * Math.cos(radians);
         this.x += distance * Math.sin(radians);
     }
+
+
 }

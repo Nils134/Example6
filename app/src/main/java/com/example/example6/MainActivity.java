@@ -262,7 +262,6 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         for (int i = 0; i < particles.size(); i++) {
             if (!validParticle(particles.get(i))) {
                 toremove.add(particles.get(i));
-                particles.remove(i);
             }
         }
         for (Particle p: toremove) {
@@ -414,7 +413,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
 
     // TODO: write in which room someone is (e.g. by deciding on the room with the most particles in it at any time)
     public void roomNumber(){
-        ImageView room = (ImageView) findViewById(R.id.roomText);
+        TextView room = (TextView) findViewById(R.id.roomText);
     }
 
     public void reDraw() {
