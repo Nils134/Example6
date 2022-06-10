@@ -518,4 +518,37 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         Rect firstRect = new Rect(first.getBounds());
         return firstRect.intersect(second.getBounds());
     }
+
+    private boolean movementCollision(Particle p, double C_x, double C_y, double D_x, double D_y) {
+        // Line AB represented as a1x + b1y = c1
+        // B = new particle place, A = prev particle place
+        double a1 = p.getY() - p.get_prev_Y();
+        double b1 = p.get_prev_X() - p.getX();
+        double c1 = a1*(p.get_prev_X()) + b1*(p.get_prev_Y());
+
+        // Line CD represented as a2x + b2y = c2
+        double a2 = D_y - C_y;
+        double b2 = C_x - D_x;
+        double c2 = a2*(C_x)+ b2*(C_y);
+
+        double determinant = a1*b2 - a2*b1;
+
+        if (determinant == 0)
+        {
+            // The lines are parallel. This is simplified
+            // by returning a pair of FLT_MAX
+            return false;
+        }
+        else
+        {
+            double x = (b2*c1 - b1*c2)/determinant;
+            double y = (a1*c2 - a2*c1)/determinant;
+            if (x < C_x && x > D_x) {
+                if (y < C_y && y > D_y) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }
