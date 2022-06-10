@@ -13,6 +13,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
+import android.graphics.drawable.shapes.RectShape;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -38,6 +39,7 @@ import java.util.TimerTask;
 import java.util.Timer;
 
 import org.apache.commons.math3.analysis.function.Gaussian;
+import org.w3c.dom.Text;
 
 /**
  * Smart Phone Sensing Example 6. Object movement and interaction on canvas.
@@ -59,13 +61,14 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     private Timer timer = new Timer();
 
     private final int NUM_PART = 1000;
-    private final double H = 50;
+    private final double H = 10;
 
     private float ROTATION_OFFSET = -58;      // the buildings standard rotational offset
     private int TOTALSTEPS = 0;
     private final float STEP_SIZE = 0.6f;
     private final int PPM = 38;         // Pixels per meter
     private boolean INITROUND = true;
+
 
     float distance = 0;
     float direction = 0;
@@ -171,35 +174,37 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     // 1080/(26,5+2)= 38 pixels/m
     // top border capped on 300 distance
     private void defineBuilding() {
-        Rectangle room1 = new Rectangle(38,300,  138,120); //room C3 center, 107, 360
+        Rectangle room1 = new Rectangle(38,300,  138,120, 3); //room C3 center, 107, 360
         building.add(room1);
-        Rectangle room2 = new Rectangle(38,420,  138,120); //room C2 center, 107, 480
+        Rectangle room2 = new Rectangle(38,420,  138,120, 2); //room C2 center, 107, 480
         building.add(room2);
-        Rectangle room3 = new Rectangle(129, 540, 47,150); //room C1 center: 152, 615
+        Rectangle room3 = new Rectangle(129, 540, 47,150, 1); //room C1 center: 152, 615
         building.add(room3);
-        Rectangle room4 = new Rectangle(178, 540-162, 182,84);//room C4 center: 269, 420
+        Rectangle room4 = new Rectangle(178, 540-162, 182,84,4 );//room C4 center: 269, 420
         building.add(room4);
-        Rectangle room5 = new Rectangle(360, 540-162, 182,84);//room C5 center: 451, 420
+        Rectangle room5 = new Rectangle(360, 540-162, 182,84,5);//room C5 center: 451, 420
         building.add(room5);
-        Rectangle room6 = new Rectangle(542, 540-162, 182,84);// room C6 center: 633, 420
+        Rectangle room6 = new Rectangle(542, 540-162, 182,84,6);// room C6 center: 633, 420
         building.add(room6);
-        Rectangle room7 = new Rectangle(724, 540-162, 182,84);//room C7 center: 815, 420
+        Rectangle room7 = new Rectangle(724, 540-162, 182,84,7);//room C7 center: 815, 420
         building.add(room7);
-        Rectangle room8 = new Rectangle(906,300,  138,120);//room C9 center: 975, 360
+        Rectangle room8 = new Rectangle(906,300,  138,120,9);//room C9 center: 975, 360
         building.add(room8);
-        Rectangle room9 = new Rectangle(906,420,  138,120);//room C10 center: 975, 480
+        Rectangle room9 = new Rectangle(906,420,  138,120,10);//room C10 center: 975, 480
         building.add(room9);
-        Rectangle room10 = new Rectangle(906, 540, 47,150);//room C11 center: 929, 615
+        Rectangle room10 = new Rectangle(906, 540, 47,150,11);//room C11 center: 929, 615
         building.add(room10);
-        Rectangle room11 = new Rectangle(906-174, 690, 221,47);//room C12 center: 842, 713
-//        building.add(room11);
-        Rectangle room12 = new Rectangle(906-164, 540-78, 164,78);//room C8 center: 814, 501
+        Rectangle room11 = new Rectangle(906-174, 690, 221,47,12);//room C12 center: 842, 713
+        building.add(room11);
+        Rectangle room12 = new Rectangle(906-164, 540-78, 164,78, 8);//room C8 center: 814, 501
         building.add(room12);
-        Rectangle room13 = new Rectangle(580, 540-162+84, 87,164);//room C13 center: 623, 536//TODO: find exact X value
+        Rectangle room13 = new Rectangle(580, 540-162+84, 87,164,13);//room C13 center: 623, 536//TODO: find exact X value
         building.add(room13);
 
         System.out.println("Defined building " + building.size());
     }
+
+    //Create extra walls/barriers/pillars to further strengthen
 
     private void drawBuilding(int width, int height) {
         walls = new ArrayList<>();
@@ -366,13 +371,46 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                 SensorManager.getOrientation(RotationM, OrientationM);
 
                 direction = (float)Math.toDegrees(OrientationM[0]) - ROTATION_OFFSET;
+                float tempdir= direction;
+                direction = clampDirection(direction);
                 arrow.setRotation(direction);
+                TextView room = (TextView) findViewById(R.id.roomText);
+                room.setText("Room: " + tempdir + "rounded" + direction);
                 break;
             case Sensor.TYPE_ACCELEROMETER:
                 while( blocking ) {         // Blocks this thread to write motionEvent list to motions list
                     System.out.println("blocking = " + blocking);
                 }
                 motionEvent.add(event.values[2]);       // Only z value is used
+        }
+    }
+
+    public float clampDirection(float direction) {
+        float temp = direction;
+        float count = 0;
+        if (direction > 0) {
+            while(temp > 45) {
+                temp -= 45;
+                count++;
+            }
+            if (count%2 == 0) {
+                return direction-temp;
+            }
+            else {
+                return direction- direction%45 + 45;
+            }
+        }
+        else {
+            while(temp < -45) {
+                temp += 45;
+                count++;
+            }
+            if (count%2 == 0) {
+                return direction-temp;
+            }
+            else {
+                return direction- direction%45 - 45;
+            }
         }
     }
 

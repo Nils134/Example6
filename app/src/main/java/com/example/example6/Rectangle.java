@@ -9,12 +9,14 @@ public class Rectangle {
     private double topleftY;
     private double width;
     private double length;
+    private int room;
 
-    public Rectangle(double X, double Y, double width, double length) {
+    public Rectangle(double X, double Y, double width, double length, int room) {
         this.topleftX = X;
         this.topleftY = Y;
         this.width = width;
         this.length = length;
+        this.room = room;
     }
 
     //allow easy drawing of a Rectangle on a screen
@@ -55,5 +57,9 @@ public class Rectangle {
 
     public double getLength() {
         return length;
+    }
+
+    public double getRoom() {
+        return room;
     }
 }
