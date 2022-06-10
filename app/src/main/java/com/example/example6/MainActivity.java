@@ -171,31 +171,31 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     // 1080/(26,5+2)= 38 pixels/m
     // top border capped on 300 distance
     private void defineBuilding() {
-        Rectangle room1 = new Rectangle(38,300,  138,120); //room C3
+        Rectangle room1 = new Rectangle(38,300,  138,120); //room C3 center, 107, 360
         building.add(room1);
-        Rectangle room2 = new Rectangle(38,420,  138,120); //room C2
+        Rectangle room2 = new Rectangle(38,420,  138,120); //room C2 center, 107, 480
         building.add(room2);
-        Rectangle room3 = new Rectangle(129, 540, 47,150); //room C1
+        Rectangle room3 = new Rectangle(129, 540, 47,150); //room C1 center: 152, 615
         building.add(room3);
-        Rectangle room4 = new Rectangle(178, 540-162, 182,84);//room C4
+        Rectangle room4 = new Rectangle(178, 540-162, 182,84);//room C4 center: 269, 420
         building.add(room4);
-        Rectangle room5 = new Rectangle(360, 540-162, 182,84);//room C5
+        Rectangle room5 = new Rectangle(360, 540-162, 182,84);//room C5 center: 451, 420
         building.add(room5);
-        Rectangle room6 = new Rectangle(542, 540-162, 182,84);// room C6
+        Rectangle room6 = new Rectangle(542, 540-162, 182,84);// room C6 center: 633, 420
         building.add(room6);
-        Rectangle room7 = new Rectangle(724, 540-162, 182,84);//room C7
+        Rectangle room7 = new Rectangle(724, 540-162, 182,84);//room C7 center: 815, 420
         building.add(room7);
-        Rectangle room8 = new Rectangle(906,300,  138,120);//room C9
+        Rectangle room8 = new Rectangle(906,300,  138,120);//room C9 center: 975, 360
         building.add(room8);
-        Rectangle room9 = new Rectangle(906,420,  138,120);//room C10
+        Rectangle room9 = new Rectangle(906,420,  138,120);//room C10 center: 975, 480
         building.add(room9);
-        Rectangle room10 = new Rectangle(906, 540, 47,150);//room C11
+        Rectangle room10 = new Rectangle(906, 540, 47,150);//room C11 center: 929, 615
         building.add(room10);
-        Rectangle room11 = new Rectangle(906-174, 690, 221,47);//room C12
+        Rectangle room11 = new Rectangle(906-174, 690, 221,47);//room C12 center: 842, 713
 //        building.add(room11);
-        Rectangle room12 = new Rectangle(906-164, 540-78, 164,78);//room C8
+        Rectangle room12 = new Rectangle(906-164, 540-78, 164,78);//room C8 center: 814, 501
         building.add(room12);
-        Rectangle room13 = new Rectangle(580, 540-162+84, 87,164);//room C13 //TODO: find exact X value
+        Rectangle room13 = new Rectangle(580, 540-162+84, 87,164);//room C13 center: 623, 536//TODO: find exact X value
         building.add(room13);
 
         System.out.println("Defined building " + building.size());
