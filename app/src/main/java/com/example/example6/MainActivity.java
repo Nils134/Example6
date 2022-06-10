@@ -263,6 +263,8 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
             p.updateDistance(distance, direction);
 //            System.out.println("New X and Y: " + p.getX() + ", " + p.getY());
         }
+
+        //check which particles still live in a room, and remove those that are invalid
         List<Particle> toremove = new ArrayList<>();
         for (int i = 0; i < particles.size(); i++) {
             if (!validParticle(particles.get(i))) {
@@ -277,12 +279,12 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         if (particles.size() == 0) {
             System.out.println("Empty particle set");
         }
-        //TODO: add replacement for samples
+        //use a CDF to allow weighted sampling over all points
         double[] cdf = cdfFromWeights();
         System.out.println("Cdf function now: " + Arrays.toString(cdf));
         while (particles.size() < NUM_PART) {
             double rand = Math.random();
-            int kernel = 0;
+            int kernel = 0; //kernel holds the points, X and Y, which we will use a mean for the the Guassian
             for (int i = 0; i < cdf.length; i++) {
                 if (cdf[i] > rand) {
                     kernel = i;
@@ -297,19 +299,22 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
             double minY = Math.random();
 
 //            System.out.println("sample to check from: " + particles.get(kernel).getX() + ", "+ particles.get(kernel).getY());
+
+            //Create new point by sampling from our Gaussian
             double newX = particles.get(kernel).getX() + Math.random() * H;
             double newY = particles.get(kernel).getY() + Math.random() * H;
-            if (minX < 0.5) {
+            if (minX < 0.5) {//allow for left-side sampling by subtracting from the mean
                 newX = particles.get(kernel).getX() - Math.random() * H;
             }
-            if (minY < 0.5) {
+            if (minY < 0.5) {//allow for right-side sampling by adding to the mean
                 newY = particles.get(kernel).getY() - Math.random() * H;
             }
 
 //            System.out.println("new particle values X " + newX + ", and Y " + newY);
 
+            //create a new particle
             Particle newP = new Particle(newX, newY, 1, Math.random()*360);
-            if (validParticle(newP)) {
+            if (validParticle(newP)) { //check if the particle is within one of our room and therefore valid
                 particles.add(newP);
 //                System.out.println("new Particle added");
             }
