@@ -424,8 +424,8 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         int height = size.y;
         System.out.println("Size of screen known as: " + width + ", and height " + height);
 
-        // create a drawable object
-        drawBuilding(width,height);
+//        // create a drawable object
+//        drawBuilding(width,height);
 
         // create a canvas
         ImageView canvasView = (ImageView) findViewById(R.id.canvas);
