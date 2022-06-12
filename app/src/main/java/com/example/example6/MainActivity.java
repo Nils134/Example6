@@ -54,6 +54,8 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     private Canvas canvas;
     private List<ShapeDrawable> walls;
 
+    private List<Rectangle> obstacles;
+
     private List<Particle> particles = new ArrayList<>();
     private List<Rectangle> building = new ArrayList<>();
     private List<Float> motionEvent = new ArrayList<>();
@@ -201,6 +203,29 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         building.add(room12);
         Rectangle room13 = new Rectangle(580, 540-162+84, 87,164,13);//room C13 center: 623, 536//TODO: find exact X value
         building.add(room13);
+
+        //Define small objects and walls between rooms to further define particles
+
+        //Define walls splitting room 7 and 8, leaving the door opening accessible
+        Rectangle topSideLeftWallRoom8 = new Rectangle(0,0,0,0,0);
+        obstacles.add(topSideLeftWallRoom8);
+        Rectangle topSideRightWallRoom8 = new Rectangle(0,0,0,0,0);
+        obstacles.add(topSideRightWallRoom8);
+
+        //Define wall between room 8 and room 10
+        Rectangle rightSideRoom8 = new Rectangle(0,0,0,0,0);
+        obstacles.add(rightSideRoom8);
+
+        //Define walls splitting room 13 and 6, leaving the door opening accessible
+        Rectangle topSideLeftWallRoom13 = new Rectangle(0,0,0,0,0);
+        obstacles.add(topSideLeftWallRoom13);
+        Rectangle topSideRightWallRoom13 = new Rectangle(0,0,0,0,0);
+        obstacles.add(topSideRightWallRoom13);
+
+        //TODO: add border object between room 3 and 2
+
+        //TODO: add border object between room 9 and 10
+
 
         System.out.println("Defined building " + building.size());
     }
