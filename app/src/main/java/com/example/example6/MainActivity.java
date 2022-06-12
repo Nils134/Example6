@@ -19,6 +19,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.provider.Telephony;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -380,7 +381,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                 direction = clampDirection(direction);
                 arrow.setRotation(direction);
                 TextView room = (TextView) findViewById(R.id.roomText);
-                room.setText("Room: " + tempdir + "rounded" + direction);
+//                room.setText("Room: " + tempdir + "rounded" + direction);
                 break;
             case Sensor.TYPE_ACCELEROMETER:
                 while( blocking ) {         // Blocks this thread to write motionEvent list to motions list
@@ -457,6 +458,30 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     // TODO: write in which room someone is (e.g. by deciding on the room with the most particles in it at any time)
     public void roomNumber(){
         TextView room = (TextView) findViewById(R.id.roomText);
+        int roomNumber = 0;
+
+        int[] roomCount = new int[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+        for (Particle p: particles) {
+            for (int i = 0; i < building.size(); i++) {
+                Rectangle rectangle = building.get(i);
+                if (p.getX() > rectangle.getTopleftX() && p.getX() < rectangle.getTopleftX() + rectangle.getWidth()) {
+                    if (p.getY() > rectangle.getTopleftY() && p.getY() < rectangle.getTopleftY() + rectangle.getLength()) {
+//                        System.out.println("particle added: X " + p.getX() + " and Y " + p.getY());
+//                        System.out.println("found in room " + i + ", coordinates " + room.getTopleftX() + ", " + room.getTopleftY());
+                        roomCount[(int) rectangle.getRoom()] +=1;
+                    }
+                }
+            }
+        }
+        int finalRoom = 0;
+        int finalRoomCount = 0;
+        for (int i = 0; i < roomCount.length; i++) {
+            if (roomCount[i] > finalRoomCount) {
+                finalRoom = i;
+                finalRoomCount = roomCount[i];
+            }
+        }
+        room.setText("Room is: " + finalRoom);
     }
 
     public void reDraw() {
@@ -493,6 +518,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
             }
             shape.draw(canvas);
         }
+        roomNumber();
     }
 
 

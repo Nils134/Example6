@@ -59,7 +59,7 @@ public class Rectangle {
         return length;
     }
 
-    public double getRoom() {
+    public int getRoom() {
         return room;
     }
 }
