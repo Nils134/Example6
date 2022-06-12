@@ -19,6 +19,8 @@ public class Particle {
         this.y = y;
         this.distance = dist;
         this.rotation = rot;
+        this.prev_y = y;
+        this.prev_x = x;
     }
 
     public double getX() {
