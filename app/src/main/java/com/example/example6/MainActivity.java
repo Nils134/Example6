@@ -45,7 +45,7 @@ import org.apache.commons.math3.analysis.function.Gaussian;
 public class MainActivity extends Activity implements OnClickListener, SensorEventListener {
 
     private SensorManager sensorManager;
-    private Sensor stepSensor, directionSensor;
+    private Sensor stepSensor, directionSensor, mfSensor;
 
     private ShapeDrawable drawable;
     private Canvas canvas;
@@ -56,12 +56,12 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     private List<Float> motionEvent = new ArrayList<>();
     private List<Float> motions = new ArrayList<>();
 
-    private Timer timer = new Timer();
+
 
     private final int NUM_PART = 1000;
     private final double H = 50;
 
-    private float ROTATION_OFFSET = -58;      // the buildings standard rotational offset
+    private float ROTATION_OFFSET;      // the buildings standard rotational offset
     private int TOTALSTEPS = 0;
     private final float STEP_SIZE = 0.6f;
     private final int PPM = 38;         // Pixels per meter
@@ -146,9 +146,12 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         // Set the sensors
         stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         directionSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        directionSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
-        sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_FASTEST);
+        sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(this, directionSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, mfSensor, SensorManager.SENSOR_DELAY_NORMAL);
+
 
         // Start motion measurement
         try {
@@ -163,6 +166,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         super.onPause();
         sensorManager.unregisterListener(this, stepSensor);
         sensorManager.unregisterListener(this, directionSensor);
+        sensorManager.unregisterListener(this, mfSensor);
         System.out.println(steps + " steps total");
     }
 
@@ -373,6 +377,14 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                     System.out.println("blocking = " + blocking);
                 }
                 motionEvent.add(event.values[2]);       // Only z value is used
+                break;
+            case Sensor.TYPE_MAGNETIC_FIELD:
+//                // TODO calcuate rotation offset
+//                System.out.println();
+//                direction =
+//                updateParticles(0, direction);
+
+                break;
         }
     }
 
