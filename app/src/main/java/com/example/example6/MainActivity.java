@@ -207,13 +207,13 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         //Define small objects and walls between rooms to further define particles
 
         //Define walls splitting room 7 and 8, leaving the door opening accessible
-        Rectangle topSideLeftWallRoom8 = new Rectangle(906+138,420,0,120,8);
+        Rectangle topSideLeftWallRoom8 = new Rectangle(724,540-162,79,0,8);
         obstacles.add(topSideLeftWallRoom8);
-        Rectangle topSideRightWallRoom8 = new Rectangle(0,0,0,0,0);
+        Rectangle topSideRightWallRoom8 = new Rectangle(0,0,0,0,8);
         obstacles.add(topSideRightWallRoom8);
 
         //Define wall between room 8 and room 10
-        Rectangle rightSideRoom8 = new Rectangle(0,0,0,0,0);
+        Rectangle rightSideRoom8 = new Rectangle(906,420,0,120,8);
         obstacles.add(rightSideRoom8);
 
         //Define walls splitting room 13 and 6, leaving the door opening accessible
@@ -604,9 +604,9 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         //Vertical wall
         if (C_x == D_x) {
             if (p.getY() > C_y && p.getY() < D_y && p.get_prev_Y() > C_y && p.get_prev_Y() < D_y) {
-                System.out.println("within proper Y range for collision");
-                //within Y
-                System.out.println("prev X " + p.get_prev_X() + ", new X " + p.getX());
+//                System.out.println("within proper Y range for collision");
+                //within Y off wall
+//                System.out.println("prev X " + p.get_prev_X() + ", new X " + p.getX() + ", age " +p.getDistance());
                 if (p.get_prev_X() < C_x && p.getX() > C_x) {
                     System.out.println("Collision");
                     return true;
@@ -619,7 +619,17 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         }
         //Horizontal wall
         else {
-
+            if(p.getX() > C_x && p.getX() < D_x && p.get_prev_X() > C_x && p.get_prev_X() < D_x) {
+                //within X of wall
+                if (p.get_prev_Y() < C_y && p.getY() > C_y) {
+                    System.out.println("Collision");
+                    return true;
+                }
+                if  (p.get_prev_Y() > C_y && p.getY() < C_y) {
+                    System.out.println("Collision");
+                    return true;
+                }
+            }
         }
         return false;
     }
