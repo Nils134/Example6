@@ -54,7 +54,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     private Canvas canvas;
     private List<ShapeDrawable> walls;
 
-    private List<Rectangle> obstacles;
+    private List<Rectangle> obstacles = new ArrayList<>();
 
     private List<Particle> particles = new ArrayList<>();
     private List<Rectangle> building = new ArrayList<>();
@@ -207,7 +207,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         //Define small objects and walls between rooms to further define particles
 
         //Define walls splitting room 7 and 8, leaving the door opening accessible
-        Rectangle topSideLeftWallRoom8 = new Rectangle(0,0,0,0,0);
+        Rectangle topSideLeftWallRoom8 = new Rectangle(906+138,420,0,120,8);
         obstacles.add(topSideLeftWallRoom8);
         Rectangle topSideRightWallRoom8 = new Rectangle(0,0,0,0,0);
         obstacles.add(topSideRightWallRoom8);
@@ -256,6 +256,30 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         System.out.println("Size of walls is now: " + walls.size());
     }
 
+
+    private boolean noCollision(Particle particle) {
+        for (Rectangle wall : obstacles) {
+            //walls have either 0 length or 0 width, otherwise they are rectangles
+            assert wall.getWidth() == 0 || wall.getLength() == 0;
+            if (wall.getWidth() == 0) {
+//                System.out.println("found a vertical wall");
+                if (movementCollision(particle,wall.getTopleftX(), wall.getTopleftY(),
+                        wall.getTopleftX(), wall.getTopleftY() + wall.getLength())) {
+                    return false;
+                }
+            }
+            else {
+//                System.out.println("found a horizontal wall");
+                if (movementCollision(particle,wall.getTopleftX(), wall.getTopleftY(),
+                        wall.getTopleftX() + wall.getWidth(), wall.getTopleftY())) {
+                    return false;
+                }
+            }
+
+        }
+        return true;
+    }
+
     //do some validity testing for a particle
     private boolean validParticle(Particle p) {
         if (building != null) {
@@ -265,7 +289,12 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                     if (p.getY() > room.getTopleftY() && p.getY() < room.getTopleftY() + room.getLength()) {
 //                        System.out.println("particle added: X " + p.getX() + " and Y " + p.getY());
 //                        System.out.println("found in room " + i + ", coordinates " + room.getTopleftX() + ", " + room.getTopleftY());
-                        return true;
+                        if (noCollision(p)) {
+                            return true;
+                        }
+                        else {
+                            System.out.println("Detected collision");
+                        }
                     }
                 }
             }
@@ -571,34 +600,26 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     }
 
     private boolean movementCollision(Particle p, double C_x, double C_y, double D_x, double D_y) {
-        // Line AB represented as a1x + b1y = c1
-        // B = new particle place, A = prev particle place
-        double a1 = p.getY() - p.get_prev_Y();
-        double b1 = p.get_prev_X() - p.getX();
-        double c1 = a1*(p.get_prev_X()) + b1*(p.get_prev_Y());
 
-        // Line CD represented as a2x + b2y = c2
-        double a2 = D_y - C_y;
-        double b2 = C_x - D_x;
-        double c2 = a2*(C_x)+ b2*(C_y);
-
-        double determinant = a1*b2 - a2*b1;
-
-        if (determinant == 0)
-        {
-            // The lines are parallel. This is simplified
-            // by returning a pair of FLT_MAX
-            return false;
-        }
-        else
-        {
-            double x = (b2*c1 - b1*c2)/determinant;
-            double y = (a1*c2 - a2*c1)/determinant;
-            if (x < C_x && x > D_x) {
-                if (y < C_y && y > D_y) {
+        //Vertical wall
+        if (C_x == D_x) {
+            if (p.getY() > C_y && p.getY() < D_y && p.get_prev_Y() > C_y && p.get_prev_Y() < D_y) {
+                System.out.println("within proper Y range for collision");
+                //within Y
+                System.out.println("prev X " + p.get_prev_X() + ", new X " + p.getX());
+                if (p.get_prev_X() < C_x && p.getX() > C_x) {
+                    System.out.println("Collision");
+                    return true;
+                }
+                if  (p.get_prev_X() > C_x && p.getX() < C_x) {
+                    System.out.println("Collision");
                     return true;
                 }
             }
+        }
+        //Horizontal wall
+        else {
+
         }
         return false;
     }
