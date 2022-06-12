@@ -63,7 +63,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
 
     private Timer timer = new Timer();
 
-    private final int NUM_PART = 1000;
+    private final int NUM_PART = 5000;
     private final double H = 10;
 
     private float ROTATION_OFFSET = -58;      // the buildings standard rotational offset
@@ -207,19 +207,19 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         //Define small objects and walls between rooms to further define particles
 
         //Define walls splitting room 7 and 8, leaving the door opening accessible
-        Rectangle topSideLeftWallRoom8 = new Rectangle(724,540-162,65,0,8);
+        Rectangle topSideLeftWallRoom8 = new Rectangle(724,540-162+ 84,65,0,1);
         obstacles.add(topSideLeftWallRoom8);
-        Rectangle topSideRightWallRoom8 = new Rectangle(906-70,540-162,70,0,8);
+        Rectangle topSideRightWallRoom8 = new Rectangle(906-70,540-162+ 84,70,0,2);
         obstacles.add(topSideRightWallRoom8);
 
         //Define wall between room 8 and room 10
-        Rectangle rightSideRoom8 = new Rectangle(906,420,0,120,8);
+        Rectangle rightSideRoom8 = new Rectangle(906,420,0,120,3);
         obstacles.add(rightSideRoom8);
 
         //Define walls splitting room 13 and 6, leaving the door opening accessible
-        Rectangle topSideLeftWallRoom13 = new Rectangle(542, 540-162+84,80,0,0);
+        Rectangle topSideLeftWallRoom13 = new Rectangle(542, 540-162+84,80,0,4);
         obstacles.add(topSideLeftWallRoom13);
-        Rectangle topSideRightWallRoom13 = new Rectangle(542+117,540-162+84,65,0,0);
+        Rectangle topSideRightWallRoom13 = new Rectangle(542+117,540-162+84,65,0,5);
         obstacles.add(topSideRightWallRoom13);
 
         //TODO: add border object between room 3 and 2
@@ -265,6 +265,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
 //                System.out.println("found a vertical wall");
                 if (movementCollision(particle,wall.getTopleftX(), wall.getTopleftY(),
                         wall.getTopleftX(), wall.getTopleftY() + wall.getLength())) {
+                    System.out.println("hit obstacle " + wall.getRoom());
                     return false;
                 }
             }
@@ -272,6 +273,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
 //                System.out.println("found a horizontal wall");
                 if (movementCollision(particle,wall.getTopleftX(), wall.getTopleftY(),
                         wall.getTopleftX() + wall.getWidth(), wall.getTopleftY())) {
+                    System.out.println("hit obstacle " + wall.getRoom());
                     return false;
                 }
             }
@@ -562,6 +564,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
             wall.draw(canvas);
         }
 
+
         drawable.draw(canvas);
         for (Particle p : particles) {
             ShapeDrawable shape = new ShapeDrawable(new OvalShape());
@@ -622,11 +625,12 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
             if(p.getX() > C_x && p.getX() < D_x && p.get_prev_X() > C_x && p.get_prev_X() < D_x) {
                 //within X of wall
                 if (p.get_prev_Y() < C_y && p.getY() > C_y) {
-                    System.out.println("Collision");
+                    System.out.println("Y Collision with " );
+
                     return true;
                 }
                 if  (p.get_prev_Y() > C_y && p.getY() < C_y) {
-                    System.out.println("Collision");
+                    System.out.println("Y Collision");
                     return true;
                 }
             }
