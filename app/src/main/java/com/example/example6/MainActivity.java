@@ -207,9 +207,9 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         //Define small objects and walls between rooms to further define particles
 
         //Define walls splitting room 7 and 8, leaving the door opening accessible
-        Rectangle topSideLeftWallRoom8 = new Rectangle(724,540-162,79,0,8);
+        Rectangle topSideLeftWallRoom8 = new Rectangle(724,540-162,65,0,8);
         obstacles.add(topSideLeftWallRoom8);
-        Rectangle topSideRightWallRoom8 = new Rectangle(0,0,0,0,8);
+        Rectangle topSideRightWallRoom8 = new Rectangle(906-70,540-162,70,0,8);
         obstacles.add(topSideRightWallRoom8);
 
         //Define wall between room 8 and room 10
@@ -217,9 +217,9 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         obstacles.add(rightSideRoom8);
 
         //Define walls splitting room 13 and 6, leaving the door opening accessible
-        Rectangle topSideLeftWallRoom13 = new Rectangle(0,0,0,0,0);
+        Rectangle topSideLeftWallRoom13 = new Rectangle(542, 540-162+84,80,0,0);
         obstacles.add(topSideLeftWallRoom13);
-        Rectangle topSideRightWallRoom13 = new Rectangle(0,0,0,0,0);
+        Rectangle topSideRightWallRoom13 = new Rectangle(542+117,540-162+84,65,0,0);
         obstacles.add(topSideRightWallRoom13);
 
         //TODO: add border object between room 3 and 2
