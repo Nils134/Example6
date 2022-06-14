@@ -443,7 +443,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                 direction = (float)Math.toDegrees(OrientationM[0]) - ROTATION_OFFSET;
                 float tempdir= direction;
                 direction = clampDirection(direction);
-                arrow.setRotation(direction);
+                arrow.setRotation(direction-90);
                 TextView room = (TextView) findViewById(R.id.roomText);
 //                room.setText("Room: " + tempdir + "rounded" + direction);
                 break;
