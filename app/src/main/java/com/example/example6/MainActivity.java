@@ -223,9 +223,11 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         obstacles.add(topSideRightWallRoom13);
 
         //TODO: add border object between room 3 and 2
-
+        Rectangle objectRoom3 = new Rectangle(100, 540-162,78,0,3);
+        obstacles.add(objectRoom3);
         //TODO: add border object between room 9 and 10
-
+        Rectangle objectRoom9 = new Rectangle(906, 540-162,78,0,9);
+        obstacles.add(objectRoom9);
 
         System.out.println("Defined building " + building.size());
     }
