@@ -160,6 +160,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
 
 
         // Start motion measurement
+        Timer timer = new Timer();
         try {
             timer.schedule(tt, 700, 700);
         } catch (Exception e){
@@ -438,7 +439,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
 
                 direction = (float)Math.toDegrees(OrientationM[0]) - ROTATION_OFFSET;
                 float tempdir= direction;
-                direction = clampDirection(direction);
+//                direction = clampDirection(direction);
                 arrow.setRotation(direction);
                 TextView room = (TextView) findViewById(R.id.roomText);
 //                room.setText("Room: " + tempdir + "rounded" + direction);
@@ -450,6 +451,8 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                 motionEvent.add(event.values[2]);       // Only z value is used
                 break;
             case Sensor.TYPE_MAGNETIC_FIELD:
+                System.out.println("magnetic field = " + event.values);
+                arrow.setRotation(event.values[2]);
 //                // TODO calcuate rotation offset
 //                System.out.println();
 //                direction =
