@@ -383,6 +383,10 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     }
 
     public double[] cdfFromWeights() {
+        if (particles.size() == 0) {
+            generateParticles();
+        }
+
         float totalDist = 0;
         for (Particle p : particles) {
             totalDist += p.getDistance();
@@ -395,7 +399,9 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
             y_coord[i] = particles.get(i).getY();
             weights[i] = particles.get(i).getDistance()/totalDist;
         }
+
         double[] cdf = new double[particles.size()];
+
         cdf[0] = weights[0];
         for (int i = 1; i < weights.length; i++) {
             cdf[i] = cdf[i-1] + weights[i];
