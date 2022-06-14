@@ -71,6 +71,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     private final float STEP_SIZE = 0.6f;
     private final int PPM = 38;         // Pixels per meter
     private boolean INITROUND = true;
+    private double STEPNOISE = 10;
 
 
     float distance = 0;
@@ -319,7 +320,14 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     private void updateParticles(double distance, double direction) {
         for (Particle p: particles) {
 //            System.out.println("Current X and Y: " + p.getX() + ", " + p.getY());
-            p.updateDistance(distance, direction);
+            double noisyDistance = distance;
+            if (Math.random() > 0.5) {
+                noisyDistance+= Math.random() * STEPNOISE;
+            }
+            else {
+                noisyDistance -= Math.random() * STEPNOISE;
+            }
+            p.updateDistance(noisyDistance, direction);
 //            System.out.println("New X and Y: " + p.getX() + ", " + p.getY());
         }
 
