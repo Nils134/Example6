@@ -66,7 +66,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     private final int NUM_PART = 5000;
     private final double H = 10;
 
-    private float ROTATION_OFFSET;      // the buildings standard rotational offset
+    private float ROTATION_OFFSET = 0;      // the buildings standard rotational offset
     private int TOTALSTEPS = 0;
     private final float STEP_SIZE = 0.6f;
     private final int PPM = 38;         // Pixels per meter
@@ -75,11 +75,16 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
 
     float distance = 0;
     float direction = 0;
+    float prevmean = 0;
 
     int steps = 0;
+    int stairs = -1;
     int firstnewMotionEvent = 0;
     private boolean blocking = false;
+    private boolean block_steps = false;
+
     // Measures motion in periods of 700ms
+    Timer timer;
     TimerTask tt = new TimerTask() {
         @Override
         public void run() {
@@ -130,7 +135,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         // draw the objects
         drawable.draw(canvas);
         for(ShapeDrawable wall : walls) {
-            System.out.println("Drawing a wall");
+//            System.out.println("Drawing a wall");
             wall.draw(canvas);
         }
     }
@@ -152,17 +157,16 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         // Set the sensors
         stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         directionSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-        directionSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
         sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(this, directionSensor, SensorManager.SENSOR_DELAY_NORMAL);
-        sensorManager.registerListener(this, mfSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
 
         // Start motion measurement
         Timer timer = new Timer();
+        this.timer = timer;
         try {
-            timer.schedule(tt, 700, 700);
+            this.timer.schedule(tt, 700, 700);
         } catch (Exception e){
             System.out.println(e);
         }
@@ -272,7 +276,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
 //                System.out.println("found a vertical wall");
                 if (movementCollision(particle,wall.getTopleftX(), wall.getTopleftY(),
                         wall.getTopleftX(), wall.getTopleftY() + wall.getLength())) {
-                    System.out.println("hit obstacle " + wall.getRoom());
+//                    System.out.println("hit obstacle " + wall.getRoom());
                     return false;
                 }
             }
@@ -280,7 +284,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
 //                System.out.println("found a horizontal wall");
                 if (movementCollision(particle,wall.getTopleftX(), wall.getTopleftY(),
                         wall.getTopleftX() + wall.getWidth(), wall.getTopleftY())) {
-                    System.out.println("hit obstacle " + wall.getRoom());
+//                    System.out.println("hit obstacle " + wall.getRoom());
                     return false;
                 }
             }
@@ -302,7 +306,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                             return true;
                         }
                         else {
-                            System.out.println("Detected collision");
+//                            System.out.println("Detected collision");
                         }
                     }
                 }
@@ -433,10 +437,15 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         return super.onOptionsItemSelected(item);
     }
 
+    // TODO: initial rotational offset
+    // TODO: no concurrent rotate and walk
+    // TODO: start motion model
+
     @Override
     public void onSensorChanged(SensorEvent event) {
         int currSteps = 0;
         ImageView arrow = (ImageView) findViewById(R.id.arrowIcon);
+//        arrow.setRotation(ROTATION_OFFSET);
 
         switch (event.sensor.getType()) {
             case Sensor.TYPE_ROTATION_VECTOR:
@@ -446,9 +455,13 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                 SensorManager.getOrientation(RotationM, OrientationM);
 
                 direction = (float)Math.toDegrees(OrientationM[0]) - ROTATION_OFFSET;
-                float tempdir= direction;
+
+//                System.out.println("direction " + direction);
+                if (direction > 10){
+                    block_steps = true;
+                }
 //                direction = clampDirection(direction);
-                arrow.setRotation(direction);
+                arrow.setRotation(-direction);
                 TextView room = (TextView) findViewById(R.id.roomText);
 //                room.setText("Room: " + tempdir + "rounded" + direction);
                 break;
@@ -458,17 +471,19 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                 }
                 motionEvent.add(event.values[2]);       // Only z value is used
                 break;
-            case Sensor.TYPE_MAGNETIC_FIELD:
-                System.out.println("magnetic field = " + event.values);
-                arrow.setRotation(event.values[2]);
-//                // TODO calcuate rotation offset
-//                System.out.println();
-//                direction =
-//                updateParticles(0, direction);
-
-                break;
         }
     }
+
+    public void pauseTimer() {
+        this.timer.cancel();
+    }
+
+    public void resumeTimer() {
+        Timer timer = new Timer();
+        this.timer = timer;
+        this.timer.schedule(tt, 700, 700);
+    }
+
 
     public float clampDirection(float direction) {
         float temp = direction;
@@ -511,7 +526,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     public void assessMotion(){
         float max = Float.MIN_VALUE;
         float min = Float.MAX_VALUE;
-        float variance;
+        float variance, mean, meandiff;
         for (float motion : motions){
             if (motion > max){
                 max = motion;
@@ -521,8 +536,24 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
             }
         }
         variance = max - min;
-        System.out.println("min = " + min + ", max = " + max + ", var = " + variance);
-        if (variance >= 1.4){
+        mean = min + variance/2;
+        meandiff = mean - prevmean;
+        prevmean = mean;
+        System.out.println("var = " + variance + ", mean = " + mean + ", meandiff = " + meandiff);
+        //        System.out.println("min = " + min + ", max = " + max + ", var = " + variance);
+        if (Math.abs(meandiff) >= 1){         // walking stairs
+            System.out.println("1 stair");
+            stairs++;
+            if (stairs >= 20){      // TODO: change static
+                if (meandiff > 0){      // walking up stairs 1 level
+
+                } else {      // walking down stairs 1 level
+
+                }
+                stairs = 0;
+            }
+        }
+        else if (variance >= 1.4){      // walking
             System.out.println("1 step");
             steps++;
             distance = 1 * STEP_SIZE * PPM;
@@ -571,8 +602,8 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         int height = size.y;
         System.out.println("Size of screen known as: " + width + ", and height " + height);
 
-//        // create a drawable object
-//        drawBuilding(width,height);
+        // create a drawable object
+        drawBuilding(width,height);
 
         // create a canvas
         ImageView canvasView = (ImageView) findViewById(R.id.canvas);
@@ -634,11 +665,11 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                 //within Y off wall
 //                System.out.println("prev X " + p.get_prev_X() + ", new X " + p.getX() + ", age " +p.getDistance());
                 if (p.get_prev_X() < C_x && p.getX() > C_x) {
-                    System.out.println("Collision");
+//                    System.out.println("Collision");
                     return true;
                 }
                 if  (p.get_prev_X() > C_x && p.getX() < C_x) {
-                    System.out.println("Collision");
+//                    System.out.println("Collision");
                     return true;
                 }
             }
@@ -648,12 +679,12 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
             if(p.getX() > C_x && p.getX() < D_x && p.get_prev_X() > C_x && p.get_prev_X() < D_x) {
                 //within X of wall
                 if (p.get_prev_Y() < C_y && p.getY() > C_y) {
-                    System.out.println("Y Collision with " );
+//                    System.out.println("Y Collision with " );
 
                     return true;
                 }
                 if  (p.get_prev_Y() > C_y && p.getY() < C_y) {
-                    System.out.println("Y Collision");
+//                    System.out.println("Y Collision");
                     return true;
                 }
             }
