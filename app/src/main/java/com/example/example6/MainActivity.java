@@ -76,6 +76,8 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     float distance = 0;
     float direction = 0;
     float prevmean = 0;
+    int levelup = 0;
+    int leveldown = 0;
 
     int steps = 0;
     int stairs = -1;
@@ -542,13 +544,26 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         System.out.println("var = " + variance + ", mean = " + mean + ", meandiff = " + meandiff);
         //        System.out.println("min = " + min + ", max = " + max + ", var = " + variance);
         if (Math.abs(meandiff) >= 1){         // walking stairs
+            TextView room = (TextView) findViewById(R.id.roomText);
+
             System.out.println("1 stair");
             stairs++;
             if (stairs >= 20){      // TODO: change static
                 if (meandiff > 0){      // walking up stairs 1 level
-
+                    levelup++;
+                    leveldown--;
+                    if (levelup > 1){     // if one has walked up a level already
+                        room.setText("Room is: 15");
+                    }
+                    else if (steps > 5 && levelup == 1){
+                        room.setText("Room is: 14");
+                    }
                 } else {      // walking down stairs 1 level
-
+                    levelup--;
+                    leveldown++;
+                    if (leveldown > 1){
+                        room.setText("Room is: 13");
+                    }
                 }
                 stairs = 0;
             }
