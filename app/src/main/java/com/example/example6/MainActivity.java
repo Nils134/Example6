@@ -223,10 +223,10 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         Rectangle topSideRightWallRoom13 = new Rectangle(542+117,540-162+84,65,0,5);
         obstacles.add(topSideRightWallRoom13);
 
-        //TODO: add border object between room 3 and 2
+
         Rectangle objectRoom3 = new Rectangle(100, 540-162,78,0,3);
         obstacles.add(objectRoom3);
-        //TODO: add border object between room 9 and 10
+
         Rectangle objectRoom9 = new Rectangle(906, 540-162,78,0,9);
         obstacles.add(objectRoom9);
 
@@ -527,7 +527,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         motions.clear();
     }
 
-    // TODO: write in which room someone is (e.g. by deciding on the room with the most particles in it at any time)
+    
     public void roomNumber(){
         TextView room = (TextView) findViewById(R.id.roomText);
         int roomNumber = 0;
