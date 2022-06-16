@@ -559,14 +559,15 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         //        System.out.println("min = " + min + ", max = " + max + ", var = " + variance);
 
         if (!block_steps){
-            if (variance > 3.5){         // walking stairs
+            if (Math.abs(variance) > 3.5){         // walking stairs
                 TextView room = (TextView) findViewById(R.id.roomText);
 
                 System.out.println("1 stair");
 //                printToast("stairs");
                 stairs++;
                 if (stairs >= 15) {
-                    if (meandiff > 0) {      // walking up stairs 1 level
+                    if (variance > 0) {      // walking up stairs 1 level
+                        System.out.println("1 up");
                         levelup++;
                         leveldown--;
                         if (levelup > 1) {     // if one has walked up a level already
@@ -575,6 +576,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                             room.setText("Room is: 15");
                         }
                     } else {      // walking down stairs 1 level
+                        System.out.println("1 down");
                         levelup--;
                         leveldown++;
                         if (leveldown > 1) {
