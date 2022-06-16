@@ -66,7 +66,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     private final int NUM_PART = 5000;
     private final double H = 10;
 
-    private float ROTATION_OFFSET = 0;      // the buildings standard rotational offset
+    private float ROTATION_OFFSET = -125;      // the buildings standard rotational offset
     private int TOTALSTEPS = 0;
     private final float STEP_SIZE = 0.6f;
     private final int PPM = 38;         // Pixels per meter
@@ -566,19 +566,21 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
 
                 System.out.println("1 stair");
                 stairs++;
-                if (stairs >= 20) {      // TODO: change static
+                if (stairs >= 15) {
                     if (meandiff > 0) {      // walking up stairs 1 level
                         levelup++;
                         leveldown--;
                         if (levelup > 1) {     // if one has walked up a level already
                             room.setText("Room is: 15");
                         } else if (steps > 5 && levelup == 1) {
-                            room.setText("Room is: 14");
+                            room.setText("Room is: 15");
                         }
                     } else {      // walking down stairs 1 level
                         levelup--;
                         leveldown++;
                         if (leveldown > 1) {
+                            room.setText("Room is: 13");
+                        } else if (steps > 5 && leveldown == 1) {
                             room.setText("Room is: 13");
                         }
                     }
