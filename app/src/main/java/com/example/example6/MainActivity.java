@@ -66,7 +66,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     private final int NUM_PART = 5000;
     private final double H = 10;
 
-    private float ROTATION_OFFSET = -125;      // the buildings standard rotational offset
+    private float ROTATION_OFFSET = -120;      // the buildings standard rotational offset
     private int TOTALSTEPS = 0;
     private final float STEP_SIZE = 0.6f;
     private final int PPM = 38;         // Pixels per meter
