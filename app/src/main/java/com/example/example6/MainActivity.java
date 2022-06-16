@@ -479,8 +479,8 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                 } else {
                     block_steps = false;
                 }
-//                direction = clampDirection(direction);
-                arrow.setRotation(-direction);
+                direction = clampDirection(direction);
+                arrow.setRotation(direction);
                 TextView room = (TextView) findViewById(R.id.roomText);
 //                room.setText("Room: " + tempdir + "rounded" + direction);
                 break;
@@ -601,7 +601,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         motions.clear();
     }
 
-    // TODO: write in which room someone is (e.g. by deciding on the room with the most particles in it at any time)
+    
     public void roomNumber(){
         TextView room = (TextView) findViewById(R.id.roomText);
         int roomNumber = 0;
