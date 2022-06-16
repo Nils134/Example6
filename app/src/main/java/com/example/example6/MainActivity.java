@@ -482,6 +482,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                 while( blocking ) {         // Blocks this thread to write motionEvent list to motions list
                     System.out.println("blocking = " + blocking);
                 }
+
                 motionEvent.add(event.values[2]);       // Only z value is used
                 break;
         }
@@ -544,7 +545,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     public void assessMotion() {
         float max = Float.MIN_VALUE;
         float min = Float.MAX_VALUE;
-        float variance, mean, meandiff;
+        float variance;
         for (float motion : motions) {
             if (motion > max) {
                 max = motion;
@@ -554,14 +555,11 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
             }
         }
         variance = max - min;
-        mean = min + variance / 2;
-        meandiff = mean - prevmean;
-        prevmean = mean;
-        System.out.println("var = " + variance + ", mean = " + mean + ", meandiff = " + meandiff);
+        System.out.println("var = " + variance);
         //        System.out.println("min = " + min + ", max = " + max + ", var = " + variance);
 
         if (!block_steps){
-            if (Math.abs(meandiff) >= 1) {         // walking stairs
+            if (variance > 3.5){         // walking stairs
                 TextView room = (TextView) findViewById(R.id.roomText);
 
                 System.out.println("1 stair");
