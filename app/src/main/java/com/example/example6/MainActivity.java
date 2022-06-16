@@ -75,9 +75,11 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
 
     float distance = 0;
     float direction = 0;
+    float prevdirection = 0;
     float prevmean = 0;
     int levelup = 0;
     int leveldown = 0;
+
 
     int steps = 0;
     int stairs = -1;
@@ -92,6 +94,13 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         public void run() {
             copyMotionEvent();
             assessMotion();
+        };
+    };
+    // records rotation every 200ms
+    TimerTask rot_tt = new TimerTask() {
+        @Override
+        public void run() {
+            prevdirection = direction;
         };
     };
 
@@ -140,6 +149,14 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
 //            System.out.println("Drawing a wall");
             wall.draw(canvas);
         }
+
+        Timer rotTimer = new Timer();
+        try {
+            rotTimer.schedule(tt, 200, 200);
+        } catch (Exception e){
+            System.out.println(e);
+        }
+
     }
 
     @Override
@@ -441,13 +458,11 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
 
     // TODO: initial rotational offset
     // TODO: no concurrent rotate and walk
-    // TODO: start motion model
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         int currSteps = 0;
         ImageView arrow = (ImageView) findViewById(R.id.arrowIcon);
-//        arrow.setRotation(ROTATION_OFFSET);
 
         switch (event.sensor.getType()) {
             case Sensor.TYPE_ROTATION_VECTOR:
@@ -458,9 +473,11 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
 
                 direction = (float)Math.toDegrees(OrientationM[0]) - ROTATION_OFFSET;
 
-//                System.out.println("direction " + direction);
-                if (direction > 10){
+                System.out.println("direction = " + direction + ", prevdirection = " + prevdirection);
+                if (Math.abs(direction - prevdirection) > 20){      // if rotating, do not walk
                     block_steps = true;
+                } else {
+                    block_steps = false;
                 }
 //                direction = clampDirection(direction);
                 arrow.setRotation(-direction);
@@ -525,57 +542,57 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         blocking = false;
     }
 
-    public void assessMotion(){
+    public void assessMotion() {
         float max = Float.MIN_VALUE;
         float min = Float.MAX_VALUE;
         float variance, mean, meandiff;
-        for (float motion : motions){
-            if (motion > max){
+        for (float motion : motions) {
+            if (motion > max) {
                 max = motion;
             }
-            if (motion < min){
+            if (motion < min) {
                 min = motion;
             }
         }
         variance = max - min;
-        mean = min + variance/2;
+        mean = min + variance / 2;
         meandiff = mean - prevmean;
         prevmean = mean;
         System.out.println("var = " + variance + ", mean = " + mean + ", meandiff = " + meandiff);
         //        System.out.println("min = " + min + ", max = " + max + ", var = " + variance);
-        if (Math.abs(meandiff) >= 1){         // walking stairs
-            TextView room = (TextView) findViewById(R.id.roomText);
+        if (!block_steps){
+            if (Math.abs(meandiff) >= 1) {         // walking stairs
+                TextView room = (TextView) findViewById(R.id.roomText);
 
-            System.out.println("1 stair");
-            stairs++;
-            if (stairs >= 20){      // TODO: change static
-                if (meandiff > 0){      // walking up stairs 1 level
-                    levelup++;
-                    leveldown--;
-                    if (levelup > 1){     // if one has walked up a level already
-                        room.setText("Room is: 15");
+                System.out.println("1 stair");
+                stairs++;
+                if (stairs >= 20) {      // TODO: change static
+                    if (meandiff > 0) {      // walking up stairs 1 level
+                        levelup++;
+                        leveldown--;
+                        if (levelup > 1) {     // if one has walked up a level already
+                            room.setText("Room is: 15");
+                        } else if (steps > 5 && levelup == 1) {
+                            room.setText("Room is: 14");
+                        }
+                    } else {      // walking down stairs 1 level
+                        levelup--;
+                        leveldown++;
+                        if (leveldown > 1) {
+                            room.setText("Room is: 13");
+                        }
                     }
-                    else if (steps > 5 && levelup == 1){
-                        room.setText("Room is: 14");
-                    }
-                } else {      // walking down stairs 1 level
-                    levelup--;
-                    leveldown++;
-                    if (leveldown > 1){
-                        room.setText("Room is: 13");
-                    }
+                    stairs = 0;
                 }
-                stairs = 0;
+            } else if (variance >= 1.4) {      // walking
+                System.out.println("1 step");
+                steps++;
+                distance = 1 * STEP_SIZE * PPM;
+                updateParticles(distance, direction);
+                reDraw();
+            } else {
+                System.out.println("NO STEPS");
             }
-        }
-        else if (variance >= 1.4){      // walking
-            System.out.println("1 step");
-            steps++;
-            distance = 1 * STEP_SIZE * PPM;
-            updateParticles(distance, direction);
-            reDraw();
-        } else {
-            System.out.println("NO STEPS");
         }
         motions.clear();
     }
