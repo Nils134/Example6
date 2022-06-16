@@ -67,11 +67,8 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     private final double H = 10;
 
     private float ROTATION_OFFSET = -120;      // the buildings standard rotational offset
-    private int TOTALSTEPS = 0;
     private final float STEP_SIZE = 0.6f;
     private final int PPM = 38;         // Pixels per meter
-    private boolean INITROUND = true;
-
 
     float distance = 0;
     float direction = 0;
@@ -83,6 +80,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
 
     int steps = 0;
     int stairs = -1;
+
     int firstnewMotionEvent = 0;
     private boolean blocking = false;
     private boolean block_steps = false;
@@ -96,7 +94,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
             assessMotion();
         };
     };
-    // records rotation every 200ms
+    // records rotation every 400ms
     TimerTask rot_tt = new TimerTask() {
         @Override
         public void run() {
@@ -196,7 +194,6 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         super.onPause();
         sensorManager.unregisterListener(this, stepSensor);
         sensorManager.unregisterListener(this, directionSensor);
-        sensorManager.unregisterListener(this, mfSensor);
         System.out.println(steps + " steps total");
     }
 
@@ -455,9 +452,6 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         }
         return super.onOptionsItemSelected(item);
     }
-
-    // TODO: initial rotational offset
-    // TODO: no concurrent rotate and walk
 
     @Override
     public void onSensorChanged(SensorEvent event) {
