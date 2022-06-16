@@ -226,7 +226,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         building.add(room11);
         Rectangle room12 = new Rectangle(906-164, 540-78, 164,78, 8);//room C8 center: 814, 501
         building.add(room12);
-        Rectangle room13 = new Rectangle(580, 540-162+84, 87,164,13);//room C13 center: 623, 536//TODO: find exact X value
+        Rectangle room13 = new Rectangle(580, 540-162+84, 87,164,14);//room C14 center: 623, 536//TODO: find exact X value
         building.add(room13);
 
         //Define small objects and walls between rooms to further define particles
@@ -473,8 +473,8 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                 } else {
                     block_steps = false;
                 }
-//                direction = clampDirection(direction);
-                arrow.setRotation(-direction);
+                float clamp_direction = clampDirection(direction);
+                arrow.setRotation(clamp_direction);
                 TextView room = (TextView) findViewById(R.id.roomText);
 //                room.setText("Room: " + tempdir + "rounded" + direction);
                 break;
@@ -536,6 +536,11 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         blocking = false;
     }
 
+    private void printToast(String toastmsg){
+        Toast toast = Toast.makeText(getApplicationContext(),toastmsg, Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
     public void assessMotion() {
         float max = Float.MIN_VALUE;
         float min = Float.MAX_VALUE;
@@ -554,11 +559,13 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         prevmean = mean;
         System.out.println("var = " + variance + ", mean = " + mean + ", meandiff = " + meandiff);
         //        System.out.println("min = " + min + ", max = " + max + ", var = " + variance);
+
         if (!block_steps){
             if (Math.abs(meandiff) >= 1) {         // walking stairs
                 TextView room = (TextView) findViewById(R.id.roomText);
 
                 System.out.println("1 stair");
+//                printToast("stairs");
                 stairs++;
                 if (stairs >= 15) {
                     if (meandiff > 0) {      // walking up stairs 1 level
@@ -584,7 +591,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                 System.out.println("1 step");
                 steps++;
                 distance = 1 * STEP_SIZE * PPM;
-                updateParticles(distance, direction);
+                updateParticles(distance, clampDirection(direction));
                 reDraw();
             } else {
                 System.out.println("NO STEPS");
@@ -595,7 +602,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         motions.clear();
     }
 
-    // TODO: write in which room someone is (e.g. by deciding on the room with the most particles in it at any time)
+
     public void roomNumber(){
         TextView room = (TextView) findViewById(R.id.roomText);
         int roomNumber = 0;
