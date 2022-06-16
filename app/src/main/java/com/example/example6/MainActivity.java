@@ -152,7 +152,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
 
         Timer rotTimer = new Timer();
         try {
-            rotTimer.schedule(tt, 200, 200);
+            rotTimer.schedule(rot_tt, 400, 400);
         } catch (Exception e){
             System.out.println(e);
         }
@@ -473,8 +473,8 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
 
                 direction = (float)Math.toDegrees(OrientationM[0]) - ROTATION_OFFSET;
 
-                System.out.println("direction = " + direction + ", prevdirection = " + prevdirection);
-                if (Math.abs(direction - prevdirection) > 20){      // if rotating, do not walk
+//                System.out.println("direction = " + direction + ", prevdirection = " + prevdirection);
+                if (Math.abs(direction - prevdirection) > 10){      // if rotating, do not walk
                     block_steps = true;
                 } else {
                     block_steps = false;
@@ -593,6 +593,8 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
             } else {
                 System.out.println("NO STEPS");
             }
+        } else {
+            System.out.println("NO STEPS (ROTATING)");
         }
         motions.clear();
     }
