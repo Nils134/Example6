@@ -48,7 +48,7 @@ import org.w3c.dom.Text;
 public class MainActivity extends Activity implements OnClickListener, SensorEventListener {
 
     private SensorManager sensorManager;
-    private Sensor stepSensor, directionSensor, mfSensor;
+    private Sensor stepSensor, directionSensor, pressureSensor;
 
     private ShapeDrawable drawable;
     private Canvas canvas;
@@ -71,15 +71,11 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     private final int PPM = 38;         // Pixels per meter
 
     float distance = 0;
+    float pressure = 0;
     float direction = 0;
     float prevdirection = 0;
-    float prevmean = 0;
-    int levelup = 0;
-    int leveldown = 0;
-
 
     int steps = 0;
-    int stairs = -1;
 
     int firstnewMotionEvent = 0;
     private boolean blocking = false;
@@ -174,16 +170,17 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         // Set the sensors
         stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         directionSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        pressureSensor = sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
 
         sensorManager.registerListener(this, stepSensor, SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(this, directionSensor, SensorManager.SENSOR_DELAY_NORMAL);
-
+        sensorManager.registerListener(this, pressureSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
         // Start motion measurement
         Timer timer = new Timer();
         this.timer = timer;
         try {
-            this.timer.schedule(tt, 700, 700);
+            this.timer.schedule(tt, 650, 650);
         } catch (Exception e){
             System.out.println(e);
         }
@@ -341,6 +338,21 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         }
     }
 
+    private void particlesInStairwell() {
+        // remove all particles
+        particles.clear();
+
+        // generate new particles in stairwell
+        System.out.println("Generating particles");
+        while(particles.size() < NUM_PART) {
+//            new Rectangle(580, 540-162+84, 87,164,14);//room C14 center: 623, 536//TODO: find exact X value
+            Particle part = new Particle(580 + Math.random()*87, 540-162+84 + Math.random()*164, 1, Math.random()* 360);
+            if (validParticle(part)) {
+                particles.add(part);
+            }
+        }
+    }
+
     private void updateParticles(double distance, double direction) {
         for (Particle p: particles) {
 //            System.out.println("Current X and Y: " + p.getX() + ", " + p.getY());
@@ -485,6 +497,10 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
 
                 motionEvent.add(event.values[2]);       // Only z value is used
                 break;
+            case Sensor.TYPE_PRESSURE:
+                pressure = event.values[0];
+                System.out.println("pressure = " + event.values[0]);
+                break;
         }
     }
 
@@ -547,6 +563,7 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         float min = Float.MAX_VALUE;
         float variance;
         for (float motion : motions) {
+            System.out.println(motions);
             if (motion > max) {
                 max = motion;
             }
@@ -556,38 +573,10 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         }
         variance = max - min;
         System.out.println("var = " + variance);
-        //        System.out.println("min = " + min + ", max = " + max + ", var = " + variance);
+                System.out.println("min = " + min + ", max = " + max + ", var = " + variance);
 
         if (!block_steps){
-            if (Math.abs(variance) > 3.5){         // walking stairs
-                TextView room = (TextView) findViewById(R.id.roomText);
-
-                System.out.println("1 stair");
-//                printToast("stairs");
-                stairs++;
-                if (stairs >= 15) {
-                    if (variance > 0) {      // walking up stairs 1 level
-                        System.out.println("1 up");
-                        levelup++;
-                        leveldown--;
-                        if (levelup > 1) {     // if one has walked up a level already
-                            room.setText("Room is: 15");
-                        } else if (steps > 5 && levelup == 1) {
-                            room.setText("Room is: 15");
-                        }
-                    } else {      // walking down stairs 1 level
-                        System.out.println("1 down");
-                        levelup--;
-                        leveldown++;
-                        if (leveldown > 1) {
-                            room.setText("Room is: 13");
-                        } else if (steps > 5 && leveldown == 1) {
-                            room.setText("Room is: 13");
-                        }
-                    }
-                    stairs = 0;
-                }
-            } else if (variance >= 1.4) {      // walking
+            if (variance >= 1.4) {      // walking
                 System.out.println("1 step");
                 steps++;
                 distance = 1 * STEP_SIZE * PPM;
@@ -628,6 +617,20 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                 finalRoomCount = roomCount[i];
             }
         }
+
+        // check stair level
+        if (finalRoom == 14) {
+            if (pressure > 1011.6) {      // In cell 13
+                finalRoom = 13;
+                block_steps = true;
+            } else if (pressure < 1022.2) {      // In cell 15
+                finalRoom = 15;
+                block_steps = true;
+            } else {
+                block_steps = false;
+            }
+        }
+
         room.setText("Room is: " + finalRoom);
     }
 
