@@ -47,6 +47,7 @@ import org.w3c.dom.Text;
  */
 public class MainActivity extends Activity implements OnClickListener, SensorEventListener {
 
+    private final double STEPNOISE = 10;
     private SensorManager sensorManager;
     private Sensor stepSensor, directionSensor, pressureSensor;
 
@@ -356,7 +357,15 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     private void updateParticles(double distance, double direction) {
         for (Particle p: particles) {
 //            System.out.println("Current X and Y: " + p.getX() + ", " + p.getY());
-            p.updateDistance(distance, direction);
+
+            double noisyDistance = distance;
+            if (Math.random() > 0.5) {
+                noisyDistance+= Math.random() * STEPNOISE;
+            }
+            else {
+                noisyDistance -= Math.random() * STEPNOISE;
+            }
+            p.updateDistance(noisyDistance, direction);
 //            System.out.println("New X and Y: " + p.getX() + ", " + p.getY());
         }
 
