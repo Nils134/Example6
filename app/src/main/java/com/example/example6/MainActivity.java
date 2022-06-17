@@ -62,8 +62,6 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     private List<Float> motionEvent = new ArrayList<>();
     private List<Float> motions = new ArrayList<>();
 
-
-
     private final int NUM_PART = 5000;
     private final double H = 10;
 
@@ -509,6 +507,10 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
             case Sensor.TYPE_PRESSURE:
                 pressure = event.values[0];
                 System.out.println("pressure = " + event.values[0]);
+
+                if (pressure >= 1022.2 && pressure <= 1022.6){      // in cell 14
+                    block_steps = false;
+                }
                 break;
         }
     }
@@ -590,10 +592,10 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                 steps++;
                 distance = 1 * STEP_SIZE * PPM;
                 updateParticles(distance, clampDirection(direction));
-                reDraw();
             } else {
                 System.out.println("NO STEPS");
             }
+            reDraw();
         } else {
             System.out.println("NO STEPS (ROTATING)");
         }
@@ -603,7 +605,6 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
 
     public void roomNumber(){
         TextView room = (TextView) findViewById(R.id.roomText);
-        int roomNumber = 0;
 
         int[] roomCount = new int[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
         for (Particle p: particles) {
@@ -635,8 +636,6 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
             } else if (pressure < 1022.2) {      // In cell 15
                 finalRoom = 15;
                 block_steps = true;
-            } else {
-                block_steps = false;
             }
         }
 
