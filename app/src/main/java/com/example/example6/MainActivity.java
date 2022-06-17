@@ -69,8 +69,11 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
     private final float STEP_SIZE = 0.6f;
     private final int PPM = 38;         // Pixels per meter
 
+    private float init_press = 0;
+    private float c14_press = 0;
+
     float distance = 0;
-    float pressure = 0;
+    float press_diff = 0;
     float direction = 0;
     float prevdirection = 0;
 
@@ -505,10 +508,20 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
                 motionEvent.add(event.values[2]);       // Only z value is used
                 break;
             case Sensor.TYPE_PRESSURE:
-                pressure = event.values[0];
+
+                // set initial air pressure
+                float pressure = event.values[0];
+                if (init_press == 0){
+                    init_press = pressure;
+                } else if (c14_press == 0){
+                    press_diff = pressure - init_press;
+                } else {
+                    press_diff = pressure - c14_press;
+                }
+
                 System.out.println("pressure = " + event.values[0]);
 
-                if (pressure >= 1022.2 && pressure <= 1022.6){      // in cell 14
+                if (press_diff < 0.2 && press_diff > -0.2){      // in cell 14
                     block_steps = false;
                 }
                 break;
@@ -584,8 +597,26 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         }
         variance = max - min;
         System.out.println("var = " + variance);
-                System.out.println("min = " + min + ", max = " + max + ", var = " + variance);
+        System.out.println("min = " + min + ", max = " + max + ", var = " + variance);
 
+        // set base pressure (in c14_press)
+        if (c14_press == 0){
+            if (Math.abs(press_diff) > 0.2){
+                particlesInStairwell();
+                block_steps = true;
+            }
+            if (press_diff > 0.6){
+                c14_press = init_press + 0.4f;
+            }
+            else if (press_diff < -0.6) {
+                c14_press = init_press - 0.4f;
+            }
+            else if (steps > 50) {
+                c14_press = init_press;
+            }
+        }
+
+        // check location using steps
         if (!block_steps){
             if (variance >= 1.4) {      // walking
                 System.out.println("1 step");
@@ -629,13 +660,15 @@ public class MainActivity extends Activity implements OnClickListener, SensorEve
         }
 
         // check stair level
-        if (finalRoom == 14) {
-            if (pressure > 1011.6) {      // In cell 13
+        if (finalRoom == 14 && c14_press != 0) {
+            if (press_diff > 0.2) {      // In cell 13
                 finalRoom = 13;
                 block_steps = true;
-            } else if (pressure < 1022.2) {      // In cell 15
+                particlesInStairwell();
+            } else if (press_diff < -0.2) {      // In cell 15
                 finalRoom = 15;
                 block_steps = true;
+                particlesInStairwell();
             }
         }
 
